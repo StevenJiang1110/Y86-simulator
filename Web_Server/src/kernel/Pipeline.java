@@ -340,11 +340,15 @@ public class Pipeline {
 			if(line.length()<=0) continue;
 			
 			if(line.contains("|")){
-				String[] aStrings=line.split("|");
+				//System.out.println("line="+line);
+				String[] aStrings=line.split("\\|");
+				//System.out.println(aStrings[0]);
 				code=aStrings[0];
 			}else{
 				code=line;
 			}
+			
+			//System.out.println("code="+code);
 			
 			String[] b=code.split(":");
 			if(b.length<2) continue;
@@ -357,7 +361,7 @@ public class Pipeline {
 			instruction=instruction.replace(" ", "");
 			code_address=code_address.substring(2);
 			
-			for(int i=pc_current;i<Integer.parseInt(code_address, 16);i++){
+			for(int i=pc_current;i<Integer.parseUnsignedInt(code_address, 16);i++){
 				sBuilder.append("00");
 				pc_current++;	
 			}
@@ -365,6 +369,8 @@ public class Pipeline {
 			pc_current+=instruction.length()/2;
 			//Instruction_Memory+=instruction;
 			sBuilder.append(instruction);
+			
+			//System.out.println(instruction);
 		}
 		
 		//System.out.println("12343");
@@ -477,11 +483,11 @@ public class Pipeline {
 		
 		//System.out.printf("%d  %d\n",f_pc,Instruction_Memory.length());
         
-        imem_icode = Integer.parseInt(Instruction_Memory.substring(f_pc * 2, f_pc * 2+1), 16);
+        imem_icode = Integer.parseUnsignedInt(Instruction_Memory.substring(f_pc * 2, f_pc * 2+1), 16);
         //System.out.println(imem_icode);
         
         //System.out.println(Instruction_Memory.substring(f_pc * 2 + 1, 1));
-        imem_ifun = Integer.parseInt(Instruction_Memory.substring(f_pc * 2 + 1, f_pc * 2 + 1+1), 16);
+        imem_ifun = Integer.parseUnsignedInt(Instruction_Memory.substring(f_pc * 2 + 1, f_pc * 2 + 1+1), 16);
         //System.out.println(imem_ifun);
         if (imem_icode == IHALT || imem_icode == INOP || imem_icode == IRET)
         {
@@ -492,8 +498,8 @@ public class Pipeline {
         else if (imem_icode == IRRMOVL && imem_ifun < 7 || imem_icode == IOPL && imem_ifun < 4 || imem_icode == IPUSHL && imem_ifun == 0 || imem_icode == IPOPL && imem_ifun == 0)
         {
             f_valP = f_pc + 2;
-            f_rA = Integer.parseInt(Instruction_Memory.substring(f_pc * 2 + 2, f_pc * 2 + 2+1), 16);
-            f_rB = Integer.parseInt(Instruction_Memory.substring(f_pc * 2 + 3, f_pc * 2 + 3+1), 16);
+            f_rA = Integer.parseUnsignedInt(Instruction_Memory.substring(f_pc * 2 + 2, f_pc * 2 + 2+1), 16);
+            f_rB = Integer.parseUnsignedInt(Instruction_Memory.substring(f_pc * 2 + 3, f_pc * 2 + 3+1), 16);
             if (f_rA == 8)
                 f_rA = RNONE;
             if (f_rB == 8)
@@ -509,8 +515,8 @@ public class Pipeline {
         else if ((imem_icode == IIRMOVL || imem_icode == IRRMOVL || imem_icode == IMRMOVL) && imem_ifun == 0)
         {
             f_valP = f_pc + 6;
-            f_rA = Integer.parseInt(Instruction_Memory.substring(f_pc * 2 + 2, f_pc * 2 + 2+1), 16);
-            f_rB = Integer.parseInt(Instruction_Memory.substring(f_pc * 2 + 3, f_pc * 2 + 3+1), 16);
+            f_rA = Integer.parseUnsignedInt(Instruction_Memory.substring(f_pc * 2 + 2, f_pc * 2 + 2+1), 16);
+            f_rB = Integer.parseUnsignedInt(Instruction_Memory.substring(f_pc * 2 + 3, f_pc * 2 + 3+1), 16);
             if (f_rA == 8)
                 f_rA = RNONE;
             if (f_rB == 8)
@@ -523,12 +529,16 @@ public class Pipeline {
 	
 	int little_endian(String a)
     {
+		//System.out.println("a="+a);
         char c0 = a.charAt(6), c1 = a.charAt(7), c2 = a.charAt(4), c3 = a.charAt(5), c4 = a.charAt(2), c5 = a.charAt(3), c6 = a.charAt(0), c7 = a.charAt(1);
         StringBuilder x = new StringBuilder();
         x.append(c0);x.append(c1);x.append(c2);x.append(c3);
         x.append(c4);x.append(c5);x.append(c6);x.append(c7);
         String yString=x.toString();
-        return Integer.parseInt(yString, 16);
+        
+        //System.out.println(Integer.parseUnsignedInt(yString, 16));
+        
+        return Integer.parseUnsignedInt(yString, 16);
     }
 	
 	int F_f_pc()
@@ -815,8 +825,8 @@ public class Pipeline {
     {
         if (mem_write)
         {
-        	System.out.println("mem_addr"+mem_addr);
-        	System.out.println(Math.floorMod(mem_addr, MEMORY_SIZE));
+        	//System.out.println("mem_addr"+mem_addr);
+        	//System.out.println(Math.floorMod(mem_addr, MEMORY_SIZE));
         	
             Memory[Math.floorMod(mem_addr, MEMORY_SIZE)] = (byte)(M_valA);
             Memory[Math.floorMod(mem_addr+1, MEMORY_SIZE)] = (byte)(M_valA >> 8);
@@ -833,10 +843,17 @@ public class Pipeline {
             if (Math.floorMod(mem_addr, MEMORY_SIZE) < Instruction_Memory.length() / 2 - 4)
             {
             	int tmem_addr=Math.floorMod(mem_addr, MEMORY_SIZE);
-                a1 = Integer.parseInt(Instruction_Memory.substring(tmem_addr * 2, tmem_addr * 2+2), 16);
-                a2 = Integer.parseInt(Instruction_Memory.substring(tmem_addr * 2 + 2, tmem_addr * 2 + 2+2), 16);
-                a3 = Integer.parseInt(Instruction_Memory.substring(tmem_addr * 2 + 4, tmem_addr * 2 + 4+2), 16);
-                a4 = Integer.parseInt(Instruction_Memory.substring(tmem_addr * 2 + 6, tmem_addr * 2 + 6+2), 16);
+                a1 = Integer.parseUnsignedInt(Instruction_Memory.substring(tmem_addr * 2, tmem_addr * 2+2), 16);
+                a2 = Integer.parseUnsignedInt(Instruction_Memory.substring(tmem_addr * 2 + 2, tmem_addr * 2 + 2+2), 16);
+                a3 = Integer.parseUnsignedInt(Instruction_Memory.substring(tmem_addr * 2 + 4, tmem_addr * 2 + 4+2), 16);
+                a4 = Integer.parseUnsignedInt(Instruction_Memory.substring(tmem_addr * 2 + 6, tmem_addr * 2 + 6+2), 16);
+                
+                //System.out.println("mem_addr="+mem_addr);
+                //System.out.println("array=");
+                //System.out.println(a1);
+                //System.out.println(a2);
+                //System.out.println(a3);
+                //System.out.println(a4);
             }
             else
             {
@@ -846,6 +863,7 @@ public class Pipeline {
                 a4 = Memory[Math.floorMod(mem_addr+3, MEMORY_SIZE)];
             }
             m_valM = a1 | (a2 << 8) | (a3 << 16) | (a4 << 24);
+            //System.out.println(m_valM);
         }
     }
 	
@@ -918,6 +936,7 @@ public class Pipeline {
 		
 		rw.printf("Cycle_%d\n", count);
         rw.println("--------------------");
+        rw.printf("Stat: %d\n", Stat);
         
         rw.flush();
         
@@ -1014,6 +1033,7 @@ public class Pipeline {
 		FetchMain();
 		
 		OutputResult(os, count);
+		//System.out.println("REAX="+Register[REAX]);
 		
 		ControlLogic();
 		Update();
@@ -1024,10 +1044,13 @@ public class Pipeline {
 	public static void main(String...strings){
 		Pipeline pipeline=new Pipeline();
 		try{
-			InputStream inputStream=new FileInputStream("E://test.y86");
+			InputStream inputStream=new FileInputStream("E://test1.y86");
 			//Scanner in=new Scanner(inputStream);
+			//String line=in.nextLine();
 			pipeline.ReadFile(inputStream);
+			//System.out.println(pipeline.Instruction_Memory);
 			int count=0;
+			
 			while(pipeline.end!=1){
 				pipeline.stepin(System.out, count);
 				count++;

@@ -1,14 +1,23 @@
 package kernel;
 
+/**
+ * This class is pipeline kernel part.
+ * This class is used to deal with y86 text code.
+ * The result will be packed into class PipelineResult.
+ * @author dell
+ */
+
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 
-public class Pipeline {
+public class Pipeline{
 	
 	public final static int MEMORY_SIZE=16097280;
 	
@@ -170,8 +179,8 @@ public class Pipeline {
 	public boolean W_stall;
 	public boolean W_bubble;
 	
-	public Scanner in;//read file from socket stream
-	public PrintWriter rw;//output result
+	public transient Scanner in;//read file from socket stream
+	public transient PrintWriter rw;//output result
 	public int end;//the ending flag
 	public String Instruction_Memory;//instruction text
 	public byte[] Memory;
@@ -932,6 +941,7 @@ public class Pipeline {
     }
 	
 	public void OutputResult(OutputStream os,int count){
+		if(os==null) return;
 		rw=new PrintWriter(os);
 		
 		rw.printf("Cycle_%d\n", count);
@@ -1040,23 +1050,135 @@ public class Pipeline {
 		
 		return true;
 	}
+
+	public PipelineResult getResult(){
+		PipelineResult result=new PipelineResult();
+		
+		result.f_pc=f_pc;
+		result.f_stat=f_stat;
+		result.need_regids=need_regids;
+		result.need_valC=need_valC;
+		result.f_rA=f_rA;
+		result.f_rB=f_rB;
+		result.f_predPC=f_predPC;
+		result.d_valA=d_valA;
+		result.d_valB=d_valB;
+		result.d_dstE=d_dstE;
+		result.d_dstM=d_dstM;
+		result.D_stat=D_stat;
+		result.D_ifun=D_ifun;
+		result.D_valC=D_valC;
+		result.E_stat=E_stat;
+		result.aluA=aluA;
+		result.aluB=aluB;
+		result.alufun=alufun;
+		result.set_cc=set_cc;
+		result.e_valA=e_valA;
+		result.mem_addr=mem_addr;
+		result.mem_read=mem_read;
+		result.mem_write=mem_write;
+		result.w_dstE=w_dstE;
+		result.w_valE=w_valE;
+		result.w_dstM=w_dstM;
+		result.w_valM=w_valM;
+		result.Stat=Stat;
+		result.F_predPC=F_predPC;
+		result.imem_icode=imem_icode;
+		result.imem_ifun=imem_ifun;
+		result.f_icode=f_icode;
+		result.f_ifun=f_ifun;
+		result.f_valC=f_valC;
+		result.f_valP=f_valP;
+		result.imem_error=imem_error;
+		result.instr_valid=instr_valid;
+		result.D_rA=D_rA;
+		result.D_rB=D_rB;
+		result.D_icode=D_icode;
+		result.D_valP=D_valP;
+		result.d_srcA=d_srcA;
+		result.d_srcB=d_srcB;
+		result.d_rvalA=d_rvalA;
+		result.d_rvalB=d_rvalB;
+		result.E_icode=E_icode;
+		result.E_ifun=E_ifun;
+		result.E_valC=E_valC;
+		result.E_srcA=E_srcA;
+		result.E_valA=E_valA;
+		result.E_srcB=E_srcB;
+		result.E_valB=E_valB;
+		result.E_dstE=E_dstE;
+		result.E_dstM=E_dstM;
+		result.e_valE=e_valE;
+		result.e_Cnd=e_Cnd;
+		result.e_dstE=e_dstE;
+		result.M_stat=M_stat;
+		result.M_icode=M_icode;
+		result.M_ifun=M_ifun;
+		result.M_valA=M_valA;
+		result.M_dstE=M_dstE;
+		result.M_valE=M_valE;
+		result.M_dstM=M_dstM;
+		result.M_Cnd=M_Cnd;
+		result.dmem_error=dmem_error;
+		result.m_valM=m_valM;
+		result.m_stat=m_stat;
+		result.W_stat=W_stat;
+		result.W_icode=W_icode;
+		result.W_dstE=W_dstE;
+		result.W_valE=W_valE;
+		result.W_dstM=W_dstM;
+		result.W_valM=W_valM;
+		result.F_stall=F_stall;
+		result.F_bubble=F_bubble;
+		result.D_stall=D_stall;
+		result.D_bubble=D_bubble;
+		result.E_stall=E_stall;
+		result.E_bubble=E_bubble;
+		result.M_stall=M_stall;
+		result.M_bubble=M_bubble;
+		result.W_stall=W_stall;
+		result.W_bubble=W_bubble;
+		result.end=end;
+		result.REAX=Register[REAX];
+		result.RECX=Register[RECX];
+		result.REDX=Register[REDX];
+		result.REBX=Register[REBX];
+		result.RESP=Register[RESP];
+		result.REBP=Register[REBP];
+		result.RESI=Register[RESI];
+		result.REDI=Register[REDI];
+		result.ZF=ZF;
+		result.SF=SF;
+		result.OF=OF;
+		
+		return result;
+	}
 	
 	public static void main(String...strings){
+		
 		Pipeline pipeline=new Pipeline();
 		try{
-			InputStream inputStream=new FileInputStream("E://test1.y86");
-			//Scanner in=new Scanner(inputStream);
-			//String line=in.nextLine();
-			pipeline.ReadFile(inputStream);
-			//System.out.println(pipeline.Instruction_Memory);
-			int count=0;
 			
+			ArrayList<PipelineResult>results=new ArrayList<>();
+			pipeline.ReadFile(new FileInputStream("E://test1.y86"));
+			FileOutputStream fs=new FileOutputStream("E://cache.dat");
+			ObjectOutputStream os=new ObjectOutputStream(fs);
+			int count=0;
 			while(pipeline.end!=1){
 				pipeline.stepin(System.out, count);
 				count++;
+				PipelineResult res=pipeline.getResult();
+				results.add(res);
 			}
+			os.writeObject(results);
+			results.clear();
+			os.close();
+			fs.close();
+			
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+		
 	}
 }
+

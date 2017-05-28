@@ -1,14 +1,25 @@
 package server;
-import java.awt.Event;
+
+/**
+ * This class is for server use.
+ * When run, server can supply service for multiple requests.
+ * As exists the limits of hardware, you'd better limit the number of requests
+ * at the same time.
+ * @author dell
+ */
+
+
 import java.awt.EventQueue;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.MessageDigestSpi;
+import java.util.ArrayList;
 
 import kernel.Pipeline;
+import kernel.PipelineResult;
 
 public class PipelineServer implements Runnable{
 	@Override
@@ -40,16 +51,29 @@ class PipelineServerHandler implements Runnable{
 	public void run(){
 		try{
 			try{
+				ArrayList<PipelineResult> results=new ArrayList<>();
 				InputStream inputStream=incoming.getInputStream();
 				OutputStream outputStream=incoming.getOutputStream();
 				Pipeline pipeline=new Pipeline();
 				pipeline.ReadFile(inputStream);
+				inputStream.close();
 				int count=0;
 				
+				PipelineResult result=pipeline.getResult();
+				results.add(result);
+				
 				while(pipeline.end!=1){
-					pipeline.stepin(outputStream, count);
+					pipeline.stepin(null, count);
 					count++;
+					PipelineResult currentResult=pipeline.getResult();
+					results.add(currentResult);
 				}
+				
+				ObjectOutputStream os=new ObjectOutputStream(outputStream);
+				os.writeObject(results);
+				os.flush();
+				outputStream.flush();
+				outputStream.close();
 			}
 			finally{
 				incoming.close();

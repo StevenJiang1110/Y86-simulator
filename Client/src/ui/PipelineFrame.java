@@ -179,6 +179,8 @@ public class PipelineFrame extends JFrame{
 		setBackgroundImage();
 		InitMenubar();
 		initMainView();
+		
+		SetDefault();
 	}
 	
 	//set background
@@ -231,6 +233,7 @@ public class PipelineFrame extends JFrame{
 				chooser.setCurrentDirectory(new File("E:\\Y86testfile"));
 				int result=chooser.showOpenDialog(PipelineFrame.this);
 				if(result==JFileChooser.APPROVE_OPTION){
+					SetDefault();
 					String name=chooser.getSelectedFile().getPath();
 					//System.out.println(name);
 					current_task=new PipelineTask();
@@ -296,6 +299,7 @@ public class PipelineFrame extends JFrame{
 					if(current_task.read_finished==false){
 						JOptionPane.showConfirmDialog(null, "request denied.", "Error", JOptionPane.PLAIN_MESSAGE);
 					}else{
+						SetDefault();
 						saveChooser.setCurrentDirectory(new File("E:\\Y86savefile"));
 						int result=saveChooser.showOpenDialog(PipelineFrame.this);
 						if(result==JFileChooser.APPROVE_OPTION){
@@ -1307,6 +1311,117 @@ public class PipelineFrame extends JFrame{
 		F_Bubble.setText(Boolean.toString(pipeline.F_bubble));
 		F_stall.setText(Boolean.toString(pipeline.F_stall));
 		F_predPC.setText("0x"+Integer.toHexString(pipeline.F_predPC));
+	}
+	
+	//set init values for the mainview
+	public void SetDefault(){
+		//RightHand
+				cycle.setText(Integer.toString(0));
+				REAX.setText("0x"+Integer.toHexString(0));
+				RECX.setText("0x"+Integer.toHexString(0));
+				REDX.setText("0x"+Integer.toHexString(0));
+				REBX.setText("0x"+Integer.toHexString(0));
+				RESP.setText("0x"+Integer.toHexString(0));
+				REBP.setText("0x"+Integer.toHexString(0));
+				RESI.setText("0x"+Integer.toHexString(0));
+				REDI.setText("0x"+Integer.toHexString(0));
+				
+				//Line1
+				W_stat.setText(stat[0]);
+				W_Bubble.setText(Boolean.toString(false));
+				W_stall.setText(Boolean.toString(false));
+				
+				//Line2
+				W_icode.setText("0x"+Integer.toHexString(0));
+				W_dstE.setText(registers[8]);
+				W_dstM.setText(registers[8]);
+				W_valE.setText("0x"+Integer.toHexString(0));
+				W_valM.setText("0x"+Integer.toHexString(0));
+				
+				//Line3
+				m_valM.setText("0x"+Integer.toHexString(0));
+				mem_addr.setText("0x"+Integer.toHexString(0));
+				mem_read.setText(Boolean.toString(false));
+				mem_write.setText(Boolean.toString(false));
+				dmem_error.setText(Boolean.toString(false));
+				
+				//Line4
+				M_stat.setText(stat[0]);
+				M_Bubble.setText(Boolean.toString(false));
+				M_stall.setText(Boolean.toString(false));
+				M_icode.setText("0x"+Integer.toHexString(0));
+				M_ifun.setText("0x"+Integer.toHexString(0));
+				M_valA.setText("0x"+Integer.toHexString(0));
+				
+				//Line5
+				M_dstE.setText(registers[8]);
+				M_valE.setText("0x"+Integer.toHexString(0));
+				M_dstM.setText(registers[8]);
+				M_Cnd.setText(Boolean.toString(false));
+				
+				//Line6
+				e_valE.setText("0x"+Integer.toHexString(0));
+				e_Cnd.setText(Boolean.toString(false));
+				e_dstE.setText(registers[8]);
+				ZF.setText(Boolean.toString(false));
+				OF.setText(Boolean.toString(false));
+				SF.setText(Boolean.toString(false));
+				alufun.setText(alu[0]);
+				
+				//Line7
+				E_stat.setText(stat[0]);
+				E_Bubble.setText(Boolean.toString(false));
+				E_stall.setText(Boolean.toString(false));
+				aluA.setText("0x"+Integer.toHexString(0));
+				aluB.setText("0x"+Integer.toHexString(0));
+				E_srcA.setText(registers[8]);
+				E_srcB.setText(registers[8]);
+				
+				//Line8
+				E_icode.setText("0x"+Integer.toHexString(0));
+				E_ifun.setText("0x"+Integer.toHexString(0));
+				E_valC.setText("0x"+Integer.toHexString(0));
+				E_valA.setText("0x"+Integer.toHexString(0));
+				E_valB.setText("0x"+Integer.toHexString(0));
+				E_dstE.setText(registers[8]);
+				E_dstM.setText(registers[8]);
+				
+				//Line9
+				d_srcA.setText(registers[8]);
+				d_srcB.setText(registers[8]);
+				d_dstE.setText(registers[8]);
+				d_dstM.setText(registers[8]);
+				d_rvalA.setText("0x"+Integer.toHexString(0));
+				d_rvalB.setText("0x"+Integer.toHexString(0));
+				
+				//Line10
+				D_stat.setText(stat[0]);
+				D_Bubble.setText(Boolean.toString(false));
+				D_stall.setText(Boolean.toString(false));
+				D_icode.setText("0x"+Integer.toHexString(0));
+				D_ifun.setText("0x"+Integer.toHexString(0));
+				D_rA.setText(registers[8]);
+				D_rB.setText(registers[8]);
+				
+				//Line11
+				D_valC.setText("0x"+Integer.toHexString(0));
+				D_valP.setText("0x"+Integer.toHexString(0));
+				need_regids.setText(Boolean.toString(false));
+				need_valC.setText(Boolean.toString(false));
+				
+				//Line12
+				f_stat.setText(stat[0]);
+				f_icode.setText("0x"+Integer.toHexString(0));
+				f_ifun.setText("0x"+Integer.toHexString(0));
+				f_pc.setText("0x"+Integer.toHexString(0));
+				f_predPC.setText("0x"+Integer.toHexString(0));
+				f_valC.setText("0x"+Integer.toHexString(0));
+				f_valP.setText("0x"+Integer.toHexString(0));
+				
+				//Line13
+				F_Bubble.setText(Boolean.toString(false));
+				F_stall.setText(Boolean.toString(false));
+				F_predPC.setText("0x"+Integer.toHexString(0));
 	}
 	
 	//main function of project

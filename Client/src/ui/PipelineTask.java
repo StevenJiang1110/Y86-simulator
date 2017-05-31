@@ -27,7 +27,7 @@ public class PipelineTask implements Runnable{
 	public static final int STEPBACK=3;
 	
 	Vector<PipelineResult> pipelineHistory;
-	String ip;
+	String ip="192.168.1.104";
 	final static String HostName="DELL-PC";
 	final static int port=8189;
 	public String fileName;
@@ -46,7 +46,7 @@ public class PipelineTask implements Runnable{
 		needNet=true;
 		try{
 			InetAddress address=InetAddress.getByName("DELL-PC");
-			ip=address.getHostAddress();
+			//ip=address.getHostAddress();
 		}catch(Exception e){
 			e.printStackTrace();
 		}
@@ -103,8 +103,8 @@ public class PipelineTask implements Runnable{
 		}
 		
 		try{
+			int waittime=0;
 			while(true){
-				int waittime=0;
 				switch (run_mode) {
 				case STOP:
 					waittime=0;
@@ -115,13 +115,13 @@ public class PipelineTask implements Runnable{
 					if(current_index<size-1){
 						current_index++;
 						Thread.sleep(interval);
-						waittime++;
 					}else{
+						//System.out.println("waittime="+waittime);
 						Thread.sleep(interval/3);
+						waittime++;
 						if(waittime>=10){
 							waittime=0;
 							run_mode=STOP;
-							waittime=0;
 						}
 					}
 					break;
@@ -169,7 +169,7 @@ public class PipelineTask implements Runnable{
 	
 	public static void main(String...strings){
 		PipelineTask runnable=new PipelineTask();
-		runnable.OpenFile("E://test1.y86");
+		runnable.OpenFile("E://Y86testfile/test1.y86");
 		Thread thread=new Thread(runnable);
 		thread.start();
 	}

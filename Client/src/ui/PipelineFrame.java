@@ -1,6 +1,8 @@
 package ui;
 
 
+import java.awt.Color;
+
 /**
  * This class is UI thread.
  * You can open a file from hard disk and get result through socket
@@ -19,6 +21,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.Vector;
 
 import javax.swing.ImageIcon;
@@ -34,6 +37,8 @@ import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import kernel.PipelineResult;
@@ -42,6 +47,10 @@ public class PipelineFrame extends JFrame{
 	private PipelineTask current_task;
 	private Thread thread;
 	private Thread currentRefreshUI=null;
+	
+	private ArrayList<PipelineTask> pipelineTasks;
+	private ArrayList<Thread> threads;
+	private int current_task_index;
 	
 	//Some Constant Values
 	String[] registers={"REAX","RECX","REDX","REBX","RESP","REBP","RESI","REDI","RNONE"};
@@ -165,6 +174,15 @@ public class PipelineFrame extends JFrame{
 	
 	//constructor
 	public PipelineFrame(){
+		pipelineTasks=new ArrayList<>();
+		threads=new ArrayList<>();
+		for(int i=0;i<6;i++){
+			pipelineTasks.add(null);
+			threads.add(null);
+		}
+		
+		current_task_index=1;
+		
 		Toolkit kit=Toolkit.getDefaultToolkit();
 		Dimension screenSize=kit.getScreenSize();
 		
@@ -238,9 +256,13 @@ public class PipelineFrame extends JFrame{
 					//System.out.println(name);
 					current_task=new PipelineTask();
 					current_task.OpenFile(name);
+					current_task.interval=clockFrequency.getValue();
 					
 					thread=new Thread(current_task);
 					thread.start();
+					
+					pipelineTasks.set(current_task_index, current_task);
+					threads.set(current_task_index, thread);
 				}
 			}
 		});
@@ -306,6 +328,7 @@ public class PipelineFrame extends JFrame{
 							String name=saveChooser.getSelectedFile().getPath();
 							current_task.current_index=-1;
 							current_task.run_mode=PipelineTask.STOP;
+							current_task.interval=clockFrequency.getValue();
 							try{
 								FileInputStream fs=new FileInputStream(name);
 								ObjectInputStream in=new ObjectInputStream(fs);
@@ -320,6 +343,8 @@ public class PipelineFrame extends JFrame{
 								e1.printStackTrace();
 							}finally {
 								JOptionPane.showConfirmDialog(null, "Save successfully!","Info",JOptionPane.PLAIN_MESSAGE);
+								pipelineTasks.set(current_task_index, current_task);
+								threads.set(current_task_index, thread);
 							}
 						}
 					}
@@ -349,8 +374,12 @@ public class PipelineFrame extends JFrame{
 							current_task=new PipelineTask();
 							current_task.pipelineHistory=pipelineResults;
 							current_task.needNet=false;
+							current_task.interval=clockFrequency.getValue();
 							thread=new Thread(current_task);
 							thread.start();
+							
+							pipelineTasks.set(current_task_index, current_task);
+							threads.set(current_task_index, thread);
 							//System.out.println("start");
 						}
 					}
@@ -382,6 +411,7 @@ public class PipelineFrame extends JFrame{
 				// TODO Auto-generated method stub
 				if(current_task!=null){
 					current_task.run_mode=PipelineTask.STEPIN;
+					current_task.interval=clockFrequency.getValue();
 				}
 			}
 		});
@@ -424,6 +454,219 @@ public class PipelineFrame extends JFrame{
 				// TODO Auto-generated method stub
 				if(current_task!=null){
 					current_task.run_mode=PipelineTask.STEPBACK;
+					current_task.interval=clockFrequency.getValue();
+				}
+			}
+		});
+		
+		JMenu task=new JMenu("task");
+		menuBar.add(task);
+		
+		JMenuItem task1item=new JMenuItem("task1");
+		task.add(task1item);
+		task1item.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				current_task_index=1;
+				current_task=pipelineTasks.get(1);
+				if(current_task==null||current_task.current_index==-1) SetDefault();
+			}
+		});
+		
+		JMenuItem task2item=new JMenuItem("task2");
+		task.addSeparator();
+		task.add(task2item);
+		task2item.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				current_task_index=2;
+				current_task=pipelineTasks.get(2);
+				if(current_task==null||current_task.current_index==-1) SetDefault();
+			}
+		});
+		
+		JMenuItem task3item=new JMenuItem("task3");
+		task.addSeparator();
+		task.add(task3item);
+		task3item.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				current_task_index=3;
+				current_task=pipelineTasks.get(3);
+				if(current_task==null||current_task.current_index==-1) SetDefault();
+			}
+		});
+		
+		JMenuItem task4item=new JMenuItem("task4");
+		task.addSeparator();
+		task.add(task4item);
+		task4item.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				current_task_index=4;
+				current_task=pipelineTasks.get(4);
+				if(current_task==null||current_task.current_index==-1) SetDefault();
+			}
+		});
+		
+		JMenuItem task5item=new JMenuItem("task5");
+		task.addSeparator();
+		task.add(task5item);
+		task5item.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				current_task_index=5;
+				current_task=pipelineTasks.get(5);
+				if(current_task==null||current_task.current_index==-1) SetDefault();
+			}
+		});
+		
+		task.addMenuListener(new MenuListener() {
+			
+			@Override
+			public void menuSelected(MenuEvent e) {
+				// TODO Auto-generated method stub
+				if(pipelineTasks.get(1)==null){
+					task1item.setText("task1(null)");
+				}else{
+					String index_string=Integer.toString(pipelineTasks.get(1).current_index);
+					if(pipelineTasks.get(1).run_mode==PipelineTask.STOP){
+						task1item.setText("task1(stop)  "+index_string);
+					}else if(pipelineTasks.get(1).run_mode==PipelineTask.STEPBACK){
+						task1item.setText("task1(back)  "+index_string);
+					}else if(pipelineTasks.get(1).run_mode==PipelineTask.STEPIN){
+						task1item.setText("task1(run)  "+index_string);
+					}
+				}
+				
+				if(pipelineTasks.get(2)==null){
+					task2item.setText("task2(null)");
+				}else{
+					String index_string=Integer.toString(pipelineTasks.get(2).current_index);
+					if(pipelineTasks.get(2).run_mode==PipelineTask.STOP){
+						task2item.setText("task2(stop)  "+index_string);
+					}else if(pipelineTasks.get(2).run_mode==PipelineTask.STEPBACK){
+						task2item.setText("task2(back)  "+index_string);
+					}else if(pipelineTasks.get(2).run_mode==PipelineTask.STEPIN){
+						task2item.setText("task2(run)  "+index_string);
+					}
+				}
+				
+				if(pipelineTasks.get(3)==null){
+					task3item.setText("task3(null)");
+				}else{
+					String index_string=Integer.toString(pipelineTasks.get(3).current_index);
+					if(pipelineTasks.get(3).run_mode==PipelineTask.STOP){
+						task3item.setText("task3(stop)  "+index_string);
+					}else if(pipelineTasks.get(3).run_mode==PipelineTask.STEPBACK){
+						task3item.setText("task3(back)  "+index_string);
+					}else if(pipelineTasks.get(3).run_mode==PipelineTask.STEPIN){
+						task3item.setText("task3(run)  "+index_string);
+					}
+				}
+				
+				if(pipelineTasks.get(4)==null){
+					task4item.setText("task4(null)");
+				}else{
+					String index_string=Integer.toString(pipelineTasks.get(4).current_index);
+					if(pipelineTasks.get(4).run_mode==PipelineTask.STOP){
+						task4item.setText("task4(stop)  "+index_string);
+					}else if(pipelineTasks.get(4).run_mode==PipelineTask.STEPBACK){
+						task4item.setText("task4(back)  "+index_string);
+					}else if(pipelineTasks.get(4).run_mode==PipelineTask.STEPIN){
+						task4item.setText("task4(run)  "+index_string);
+					}
+				}
+				
+				if(pipelineTasks.get(5)==null){
+					task5item.setText("task5(null)");
+				}else{
+					String index_string=Integer.toString(pipelineTasks.get(5).current_index);
+					if(pipelineTasks.get(5).run_mode==PipelineTask.STOP){
+						task5item.setText("task5(stop)  "+index_string);
+					}else if(pipelineTasks.get(5).run_mode==PipelineTask.STEPBACK){
+						task5item.setText("task5(back)  "+index_string);
+					}else if(pipelineTasks.get(5).run_mode==PipelineTask.STEPIN){
+						task5item.setText("task5(run)  "+index_string);
+					}
+				}
+				
+				Color color=new Color(238, 238, 238);
+				task1item.setBackground(color);
+				task2item.setBackground(color);
+				task3item.setBackground(color);
+				task4item.setBackground(color);
+				task5item.setBackground(color);
+				
+				switch(current_task_index){
+				case 1:task1item.setBackground(Color.BLUE);
+				break;
+				case 2:task2item.setBackground(Color.BLUE);
+				break;
+				case 3:task3item.setBackground(Color.BLUE);
+				break;
+				case 4:task4item.setBackground(Color.BLUE);
+				break;
+				case 5:task5item.setBackground(Color.BLUE);
+				break;
+				}
+			}
+			
+			@Override
+			public void menuDeselected(MenuEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void menuCanceled(MenuEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		JMenu abort=new JMenu("abort");
+		menuBar.add(abort);
+		
+		JMenuItem abortcurrent=new JMenuItem("abort current");
+		abort.add(abortcurrent);
+		abortcurrent.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				current_task=null;
+				thread=null;
+				SetDefault();
+				pipelineTasks.set(current_task_index, null);
+				threads.set(current_task_index, null);
+			}
+		});
+		
+		JMenuItem abortall=new JMenuItem("abort all");
+		abort.addSeparator();
+		abort.add(abortall);
+		abortall.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				current_task=null;
+				thread=null;
+				SetDefault();
+				for(int i=0;i<6;i++){
+					pipelineTasks.set(i, null);
+					threads.set(i, null);
 				}
 			}
 		});
